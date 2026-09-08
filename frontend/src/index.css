@@ -75,7 +75,7 @@
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
+    --radius: 0.35rem;
     --sidebar: #f8f5ee;
     --sidebar-foreground: #1a1d20;
     --sidebar-primary: #0d7a84;
@@ -135,9 +135,29 @@
     overflow-anchor: none;
     }
   body { overflow-anchor: none; }
-  h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display Variable', serif; }
+  h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display Variable', serif; font-optical-sizing: auto; text-wrap: balance; }
+  p { text-wrap: pretty; }
   button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 }
+
+@keyframes cinematic-reveal {
+  from { opacity: 0; transform: scale(1.1); }
+  to { opacity: 1; transform: scale(1.03); }
+}
+
+@keyframes menu-reveal {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes itinerary-reveal {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-cinematic-reveal { animation: cinematic-reveal 1.2s cubic-bezier(.2,.7,.2,1) both; }
+.animate-menu-reveal { animation: menu-reveal 180ms ease-out both; }
+.animate-itinerary-reveal { animation: itinerary-reveal 220ms ease-out both; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }

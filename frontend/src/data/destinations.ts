@@ -1,4 +1,5 @@
 import type { Destination } from "./types";
+import { destinationItineraryLibrary } from "./destinationItineraries";
 
 const baliHero =
   "https://images.unsplash.com/photo-1675657144361-98ae33e6b6f9?auto=format&fit=crop&w=1800&q=85";
@@ -128,10 +129,12 @@ export const additionalInternationalDestinations: Destination[] = [
   { slug: "australia", name: "Australia", country: "Australia", region: "Oceania", descriptor: "Big landscapes, warm cities and open horizons", heroDescription: "A wide-open journey from city tables to red earth and the reef.", image: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d0?auto=format&fit=crop&w=1200&q=84", secondaryImage: "https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?auto=format&fit=crop&w=1000&q=82", category: "International", tags: ["Adventure", "Scenic", "Family"], duration: "10 Nights", bestTime: "September – November / March – May", popularWith: "Families & curious travellers", priceFrom: "₹1,78,000", about: "Australia gives you scale: a city with a great table, a reef that changes the light and a landscape that makes you feel small in the best way.", reasons: [{ title: "The outdoors", copy: "Wild coast, red earth and experiences that begin outside." }, { title: "The cities", copy: "Design, food and culture with a relaxed Australian warmth." }], experiences: [], itineraries: [], reviews: [] },
 ];
 
-export const internationalDestinations = [...destinations, ...additionalInternationalDestinations];
-export const visaFreeDestinations = [destinations.find((item) => item.slug === "bali")!, ...additionalInternationalDestinations.filter((item) => item.category === "Visa-Free")];
+const withDetailedItineraries = (destination: Destination): Destination => destination.itineraries.length > 0 ? destination : { ...destination, itineraries: destinationItineraryLibrary[destination.slug] ?? [] };
 
-export const allDestinations = [...destinations, ...additionalInternationalDestinations, ...domesticDestinations];
+export const internationalDestinations = [...destinations, ...additionalInternationalDestinations].map(withDetailedItineraries);
+export const visaFreeDestinations = internationalDestinations.filter((item) => item.slug === "bali" || item.category === "Visa-Free");
+
+export const allDestinations = [...destinations, ...additionalInternationalDestinations, ...domesticDestinations].map(withDetailedItineraries);
 
 export function getDestination(slug?: string) {
   return allDestinations.find((destination) => destination.slug === slug);

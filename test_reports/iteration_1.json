@@ -1,0 +1,69 @@
+{
+  "iteration": 1,
+  "summary": "All 8 acceptance criteria exercised via browser checks (no API-bearing criteria; site is a static, frontend-only data-driven app with no backend logic tied to any criterion). 8 passed, 0 failed.",
+  "passed": 8,
+  "failed": 0,
+  "checks": [
+    {
+      "criterion": "Explore Destinations hover menu remains open while moving the pointer from the nav label into the menu",
+      "name": "nav-mega-menu-hover-bridge",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Hovered nav-explore-destinations-button, moved mouse across bridge into mega-menu-japan-link, menu stayed visible, click navigated to /destinations/japan."
+    },
+    {
+      "criterion": "Homepage duration filter changes journey results",
+      "name": "home-duration-filter-updates-results",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "filter-duration=10+ Days shows 'Japan, in detail' and 'The Open Horizon', hides 'Bali Escape' (count 0); filter-duration=3-5 Days shows 'A City in a Garden' (Singapore)."
+    },
+    {
+      "criterion": "All listed destinations have detailed itineraries",
+      "name": "destinations-have-itinerary-sections",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Visited dubai, japan, switzerland, kashmir, kerala, rajasthan, goa, thailand, malaysia, maldives, italy, singapore, phu-quoc, turkey, australia -- each rendered itineraries-section with 'Choose your journey' heading and itinerary-timeline. Bali confirmed to render itinerary-options with count=3 (Bali Escape, Bali Highlights, Bali & Nusa Penida)."
+    },
+    {
+      "criterion": "Editorial itinerary interaction works",
+      "name": "bali-itinerary-interaction",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "On /destinations/bali, selected 2nd itinerary option (updates overview), clicked itinerary-day-toggle-02: aria-expanded flipped false->true and itinerary-day-02 content became visible."
+    },
+    {
+      "criterion": "Homepage visual refinement is present",
+      "name": "homepage-visual-refinement",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Screenshots confirm cinematic full-bleed hero with strong serif type hierarchy, square-edged image-led destination cards, and a premium dark editorial 'Why Tentwood' section (dark teal bg, portrait image, numbered list)."
+    },
+    {
+      "criterion": "Sticky navigation refinement works",
+      "name": "navbar-sticky-transition",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "At scrollY=0 navbar class includes transparent gradient 'from-black/35'; after scrollTo(0,900) navbar class switches to solid 'bg-[#0b6972]/95' with shadow/backdrop-blur."
+    },
+    {
+      "criterion": "Branded WhatsApp conversion remains available",
+      "name": "floating-whatsapp-visible-with-ctas",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "On /destinations/japan, floating-whatsapp-button ('Tentwood concierge / Begin on WhatsApp') visible and destination-request-button visible+enabled simultaneously, not obscured."
+    },
+    {
+      "criterion": "Route scroll restoration remains fixed",
+      "name": "scroll-restoration-on-route-change",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Scrolled homepage to scrollY>1000, clicked Bali link (visa-free rail, a[href='/destinations/bali']), landed on /destinations/bali with scrollY<50."
+    }
+  ],
+  "bugs": [],
+  "action_items": [
+    "No backend test artifacts were created: server.py exposes only a generic /api/ health route and a stub status-check model; none of the 8 acceptance criteria depend on any API/DB behavior -- all data (journeys, itineraries, destinations) is static TS data bundled into the frontend."
+  ],
+  "retest_needed": false
+}
