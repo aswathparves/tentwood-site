@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, Heart, MessageCircle, Play, Sparkles } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
@@ -7,20 +7,45 @@ import { domesticDestinations, internationalDestinations, visaFreeDestinations }
 import { journeys } from "@/data/journeys";
 import { featuredCampaign } from "@/data/campaigns";
 import { travellerReviews } from "@/data/reviews";
-import type { Destination } from "@/data/types";
+import type { Destination, Journey } from "@/data/types";
 import { openWhatsApp } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
 import { DestinationCard, FilterBar, JourneyCard, SearchBar, SectionHeading, Seo, SiteLayout } from "@/components/site/Shared";
 
-export default function Home() {
-  const [filters, setFilters] = useState<Record<string, string>>({ Destination: "All Destinations", Budget: "All budgets", "Travel type": "All travellers", Duration: "Any duration" });
+type JourneyFilters = Record<string, string>;
+
+const INITIAL_FILTERS: JourneyFilters = { Destination: "All Destinations", Budget: "All budgets", "Travel type": "All travellers", Duration: "Any duration" };
+
+function matchesDuration(journey: Journey, duration: string) {
+  if (duration === "Any duration") return true;
+  const days = Number(journey.duration.match(/(\d+)\s*Days/i)?.[1] ?? 0);
+  if (duration === "3–5 Days") return days >= 3 && days <= 5;
+  if (duration === "6–9 Days") return days >= 6 && days <= 9;
+  return duration === "10+ Days" && days >= 10;
+}
+
+function matchesJourneyFilters(journey: Journey, filters: JourneyFilters) {
+  const destinationMatches = filters.Destination === "All Destinations" || journey.destination === filters.Destination;
+  const budgetMatches = filters.Budget === "All budgets" || journey.budget === filters.Budget;
+  const travellerMatches = filters["Travel type"] === "All travellers" || journey.travelType === filters["Travel type"];
+  return destinationMatches && budgetMatches && travellerMatches && matchesDuration(journey, filters.Duration);
+}
+
+function useReviewCarousel(reviewCount: number) {
   const [reviewIndex, setReviewIndex] = useState(0);
-  const visibleJourneys = useMemo(() => journeys.filter((journey) => {
-    const days = Number(journey.duration.match(/(\d+)\s*Days/i)?.[1] ?? 0);
-    const durationMatches = filters.Duration === "Any duration" || (filters.Duration === "3–5 Days" && days >= 3 && days <= 5) || (filters.Duration === "6–9 Days" && days >= 6 && days <= 9) || (filters.Duration === "10+ Days" && days >= 10);
-    return (filters.Destination === "All Destinations" || journey.destination === filters.Destination) && (filters.Budget === "All budgets" || journey.budget === filters.Budget) && (filters["Travel type"] === "All travellers" || journey.travelType === filters["Travel type"]) && durationMatches;
-  }), [filters]);
-  useEffect(() => { const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; if (reduce) return; const timer = window.setInterval(() => setReviewIndex((index) => (index + 1) % travellerReviews.length), 3000); return () => window.clearInterval(timer); }, []);
+  const showNextReview = useCallback(() => setReviewIndex((current) => (current + 1) % reviewCount), [reviewCount]);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const timer = window.setInterval(showNextReview, 3000);
+    return () => window.clearInterval(timer);
+  }, [showNextReview]);
+  return { reviewIndex, setReviewIndex };
+}
+
+export default function Home() {
+  const [filters, setFilters] = useState<JourneyFilters>(INITIAL_FILTERS);
+  const { reviewIndex, setReviewIndex } = useReviewCarousel(travellerReviews.length);
+  const visibleJourneys = useMemo(() => journeys.filter((journey) => matchesJourneyFilters(journey, filters)), [filters]);
   const review = travellerReviews[reviewIndex];
   return <SiteLayout><Seo title="Travel, thoughtfully designed" description="Tentwood Trips creates curated journeys, beautiful places and experiences designed around the way you travel." />
     <section className="relative min-h-[780px] overflow-hidden bg-[#0d7a84] px-5 pb-20 pt-36 text-white sm:px-8 lg:min-h-[880px] lg:px-12 lg:pb-24 lg:pt-48" data-testid="home-hero">

@@ -1,0 +1,69 @@
+{
+  "iteration": 2,
+  "summary": "All 8 acceptance criteria (post-refactor hooks/memoization/component-split checks) exercised via browser checks. No API-bearing criteria -- app is static, frontend-only data-driven. 8 passed, 0 failed.",
+  "passed": 8,
+  "failed": 0,
+  "checks": [
+    {
+      "criterion": "Homepage memoized journey filters update from current selections without stale state",
+      "name": "home-duration-filter-updates-results",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "filter-duration=10+ Days shows 'Japan, in detail' and 'The Open Horizon', hides 'Bali Escape' (count 0); filter-duration=3-5 Days then shows 'A City in a Garden' (Singapore)."
+    },
+    {
+      "criterion": "Traveller review carousel state remains responsive after hook refactor",
+      "name": "review-carousel-navigation",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "traveller-stories-section starts on 'Nandita & Arjun'; review-next-button advances to 'Aarav Menon' then 'The Kapur family'; review-previous-button returns to 'Aarav Menon'. Section remained rendered throughout."
+    },
+    {
+      "criterion": "Destination listing memoized category filtering updates correctly",
+      "name": "destination-category-filter",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "destination-filter-visa-free shows destination-card-thailand, hides destination-card-switzerland (count 0); destination-filter-domestic shows kashmir/kerala/rajasthan/goa cards, hides destination-card-japan (count 0)."
+    },
+    {
+      "criterion": "Dynamic destination state resets cleanly between routes",
+      "name": "destination-variant-resets-on-route-change",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "On /destinations/japan selected itinerary-select-japan-slow -> heading 'Japan, Slowly' visible; navigated to /destinations/australia -> itineraries-section heading 'Australia Short Escape' visible and 'Japan, Slowly' heading count 0 (state reset via key={destination.slug})."
+    },
+    {
+      "criterion": "Desktop navigation remains functional after component split",
+      "name": "nav-mega-menu-hover-bridge",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Hovered nav-explore-destinations-button, moved mouse across bridge into mega-menu-japan-link, menu stayed visible; click navigated to /destinations/japan."
+    },
+    {
+      "criterion": "Mobile navigation remains functional after component split",
+      "name": "mobile-nav-menu-links",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "At 390x844 viewport, mobile-nav-menu-button opened sheet showing mobile-menu-destinations-link, mobile-menu-about-link, mobile-menu-contact-link and mobile-menu-featured-destinations; clicking mobile-menu-about-link navigated to /about."
+    },
+    {
+      "criterion": "Itinerary variants and timeline interactions remain intact",
+      "name": "destination-itinerary-variant-switch",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "On /destinations/japan, itinerary-options has 3 buttons; default aside heading 'Japan Short Escape'; selecting itinerary-select-japan-slow updates heading to 'Japan, Slowly' and price text changed; itinerary-day-toggle-02 aria-expanded flipped false->true revealing itinerary-day-02."
+    },
+    {
+      "criterion": "Route scroll reset remains intact after hook extraction",
+      "name": "scroll-restoration-on-route-change",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Scrolled homepage to scrollY>1000, clicked Bali link (a[href='/destinations/bali']), landed on /destinations/bali with scrollY<50."
+    }
+  ],
+  "bugs": [],
+  "action_items": [
+    "No backend test artifacts were created: server.py exposes only a generic /api/ health route; none of the 8 acceptance criteria depend on API/DB behavior -- all data (journeys, itineraries, destinations, reviews) is static TS data bundled into the frontend. Verified via `python -m pytest` (no tests collected, confirming no API-bearing criteria) and a healthy GET /api/ (200)."
+  ],
+  "retest_needed": false
+}

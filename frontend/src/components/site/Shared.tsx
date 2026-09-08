@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowUpRight, Check, ChevronDown, ChevronRight, Clock3, Filter, Menu, MessageCircle, Search } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -13,90 +13,112 @@ import type { Destination, Journey } from "@/data/types";
 
 if (typeof window !== "undefined") window.history.scrollRestoration = "manual";
 
+const FOOTER_EXPLORE_LINKS: [string, string][] = [["International destinations", "/destinations"], ["Domestic destinations", "/destinations"], ["Visa-free escapes", "/destinations"], ["Traveller stories", "/#stories"]];
+const FOOTER_TENTWOOD_LINKS: [string, string][] = [["Our story", "/about"], ["Contact us", "/contact"], ["Careers", "/careers"], ["FAQ", "/contact"]];
+
+function upsertMeta(name: string, content: string) {
+  let tag = document.querySelector(`meta[name="${name}"]`);
+  if (!tag) {
+    tag = document.createElement("meta");
+    tag.setAttribute("name", name);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute("content", content);
+}
+
+function applySeoMetadata(title: string, description: string) {
+  const pageTitle = `${title} | Tentwood Trips`;
+  document.title = pageTitle;
+  upsertMeta("description", description);
+  upsertMeta("og:title", pageTitle);
+  upsertMeta("og:description", description);
+  upsertMeta("og:type", "website");
+}
+
+function resetDocumentScroll() {
+  document.documentElement.style.scrollBehavior = "auto";
+  document.body.style.scrollBehavior = "auto";
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
+function handleInternalRouteClick(event: MouseEvent) {
+  if (!(event.target instanceof Element)) return;
+  const link = event.target.closest("a");
+  const href = link?.getAttribute("href");
+  if (!href || href.startsWith("#") || href.includes("#") || href.startsWith("http") || link?.target === "_blank") return;
+  resetDocumentScroll();
+  window.requestAnimationFrame(resetDocumentScroll);
+  window.setTimeout(resetDocumentScroll, 0);
+  window.setTimeout(resetDocumentScroll, 100);
+}
+
+function installRouteScrollReset(hash: string) {
+  window.history.scrollRestoration = "manual";
+  if (hash) return undefined;
+  resetDocumentScroll();
+  const frame = window.requestAnimationFrame(resetDocumentScroll);
+  const timer = window.setTimeout(resetDocumentScroll, 180);
+  document.addEventListener("click", handleInternalRouteClick, true);
+  return () => {
+    window.cancelAnimationFrame(frame);
+    window.clearTimeout(timer);
+    document.removeEventListener("click", handleInternalRouteClick, true);
+  };
+}
+
 export function Seo({ title, description }: { title: string; description: string }) {
-  useEffect(() => {
-    document.title = `${title} | Tentwood Trips`;
-    const setMeta = (name: string, content: string) => {
-      let tag = document.querySelector(`meta[name="${name}"]`);
-      if (!tag) { tag = document.createElement("meta"); tag.setAttribute("name", name); document.head.appendChild(tag); }
-      tag.setAttribute("content", content);
-    };
-    setMeta("description", description);
-    setMeta("og:title", `${title} | Tentwood Trips`);
-    setMeta("og:description", description);
-    setMeta("og:type", "website");
-  }, [description, title]);
+  useEffect(() => applySeoMetadata(title, description), [description, title]);
   return null;
 }
 
-export function Navbar() {
+function useScrolledHeader() {
   const [scrolled, setScrolled] = useState(false);
+  const updateScrolled = useCallback(() => setScrolled(window.scrollY > 24), []);
+  useEffect(() => {
+    updateScrolled();
+    window.addEventListener("scroll", updateScrolled, { passive: true });
+    return () => window.removeEventListener("scroll", updateScrolled);
+  }, [updateScrolled]);
+  return scrolled;
+}
+
+export function Navbar() {
+  const scrolled = useScrolledHeader();
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const megaCloseTimer = useRef<number | null>(null);
-  const location = useLocation();
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  useEffect(() => setMenuOpen(false), [location.pathname]);
-  useEffect(() => () => { if (megaCloseTimer.current) window.clearTimeout(megaCloseTimer.current); }, []);
-  const openMegaMenu = () => { if (megaCloseTimer.current) window.clearTimeout(megaCloseTimer.current); setMegaOpen(true); };
-  const closeMegaMenu = () => { megaCloseTimer.current = window.setTimeout(() => setMegaOpen(false), 180); };
-  return (
-    <>
-      <header className={cn("fixed inset-x-0 top-0 z-50 border-b text-white transition-[background-color,border-color,box-shadow,backdrop-filter] duration-500", scrolled ? "border-white/10 bg-[#0b6972]/95 shadow-[0_12px_40px_rgba(7,40,43,0.18)] backdrop-blur-md" : "border-transparent bg-gradient-to-b from-black/35 to-transparent")} data-testid="site-navbar">
-        <div className={cn("mx-auto flex max-w-[1440px] items-center justify-between px-5 transition-[height] duration-500 sm:px-8 lg:px-12", scrolled ? "h-16" : "h-20")}>
-          <Link to="/" className="group flex items-center gap-3" data-testid="nav-logo-link" aria-label="Tentwood Trips home">
-            <span className="grid h-9 w-9 place-items-center rounded-full border border-white/50 font-serif text-lg italic transition-transform duration-300 group-hover:rotate-6">T</span>
-            <span className="font-serif text-xl tracking-tight">Tentwood <span className="text-[#9de9e6]">Trips</span></span>
-          </Link>
-          <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary navigation">
-            <div className="relative" onMouseEnter={openMegaMenu} onMouseLeave={closeMegaMenu}>
-              <button type="button" className="flex cursor-pointer items-center gap-1.5 text-sm text-white/90 transition-colors hover:text-[#a8f1ef]" onFocus={openMegaMenu} onClick={() => setMegaOpen((open) => !open)} data-testid="nav-explore-destinations-button" aria-expanded={megaOpen}>
-                Explore Destinations <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", megaOpen && "rotate-180")} />
-              </button>
-              {megaOpen && <DestinationMegaMenu onNavigate={() => setMegaOpen(false)} />}
-            </div>
-            <Link to="/about" className="text-sm text-white/90 transition-colors hover:text-[#a8f1ef]" data-testid="nav-about-link">About Us</Link>
-            <Link to="/contact" className="text-sm text-white/90 transition-colors hover:text-[#a8f1ef]" data-testid="nav-contact-link">Contact Us</Link>
-            <Link to="/careers" className="text-sm text-white/90 transition-colors hover:text-[#a8f1ef]" data-testid="nav-careers-link">Careers</Link>
-            <a href={whatsappUrl()} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-white/35 px-4 py-2 text-sm transition-colors hover:border-[#a8f1ef] hover:bg-white/10" data-testid="nav-whatsapp-link"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
-            <button type="button" aria-label="Open navigation menu" className="grid h-10 w-10 place-items-center rounded-full border border-white/35 transition-colors hover:bg-white/10" onClick={() => setMenuOpen(true)} data-testid="nav-menu-button"><Menu className="h-5 w-5" /></button>
-          </nav>
-          <div className="flex items-center gap-2 lg:hidden">
-            <a href={whatsappUrl()} target="_blank" rel="noreferrer" className="grid h-10 w-10 place-items-center rounded-full border border-white/35" aria-label="Chat on WhatsApp" data-testid="mobile-nav-whatsapp-link"><MessageCircle className="h-4 w-4" /></a>
-            <button type="button" aria-label="Open navigation menu" className="grid h-10 w-10 place-items-center rounded-full border border-white/35" onClick={() => setMenuOpen(true)} data-testid="mobile-nav-menu-button"><Menu className="h-5 w-5" /></button>
-          </div>
-        </div>
-      </header>
-      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent side="right" className="w-screen border-l-0 bg-[#fdfbf7] px-6 pb-8 pt-10 sm:max-w-[460px]">
-          <SheetHeader className="border-b border-[#1a1d20]/10 pb-7 text-left">
-            <p className="font-mono text-[9px] uppercase tracking-[0.24em] text-[#0d7a84]">Tentwood journeys</p>
-            <SheetTitle className="font-serif text-3xl font-normal leading-tight text-[#1a1d20]">Where will you go next?</SheetTitle>
-            <SheetDescription className="max-w-xs text-sm leading-relaxed text-[#5a6065]">A considered journey is one conversation away.</SheetDescription>
-          </SheetHeader>
-          <div className="flex flex-col gap-2 py-6">
-            <Link to="/destinations" className="flex items-center justify-between border-b border-[#1a1d20]/10 py-4 font-serif text-2xl text-[#1a1d20]" data-testid="mobile-menu-destinations-link">Explore destinations <ArrowUpRight className="h-5 w-5 text-[#0d7a84]" /></Link>
-            <Link to="/about" className="border-b border-[#1a1d20]/10 py-4 text-lg text-[#1a1d20]" data-testid="mobile-menu-about-link">About Tentwood</Link>
-            <Link to="/contact" className="border-b border-[#1a1d20]/10 py-4 text-lg text-[#1a1d20]" data-testid="mobile-menu-contact-link">Contact Us</Link>
-            <Link to="/careers" className="border-b border-[#1a1d20]/10 py-4 text-lg text-[#1a1d20]" data-testid="mobile-menu-careers-link">Careers</Link>
-          </div>
-          <div className="mb-7 grid grid-cols-2 gap-x-5 gap-y-3 border-b border-[#1a1d20]/10 pb-7" data-testid="mobile-menu-featured-destinations">
-            {allDestinations.slice(0, 6).map((destination) => <Link key={destination.slug} to={`/destinations/${destination.slug}`} className="flex items-center justify-between py-1.5 text-sm text-[#5a6065]" data-testid={`mobile-menu-${destination.slug}-link`}>{destination.name}<ChevronRight className="h-3.5 w-3.5 text-[#0d7a84]" /></Link>)}
-          </div>
-          <div className="mt-auto border-l-2 border-[#9de9e6] bg-[#0d7a84] p-5 text-white">
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#9de9e6]">Speak with a travel expert</p>
-            <p className="mt-2 font-serif text-2xl">Let’s make a plan that feels like you.</p>
-            <a href={whatsappUrl()} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "secondary" }), "mt-5 w-full justify-center gap-2 bg-white text-[#0d7a84] hover:bg-[#e5f7f5]")} data-testid="mobile-menu-whatsapp-button"><MessageCircle className="h-4 w-4" /> Chat on WhatsApp</a>
-          </div>
-          <div className="mt-8 text-sm text-[#5a6065]"><a href={`tel:${TENTWOOD_CONTACT.phone.replace(/\s/g, "")}`} data-testid="mobile-menu-phone-link">{TENTWOOD_CONTACT.phone}</a><span className="mx-2">·</span><a href={`mailto:${TENTWOOD_CONTACT.email}`} data-testid="mobile-menu-email-link">{TENTWOOD_CONTACT.email}</a></div>
-        </SheetContent>
-      </Sheet>
-    </>
-  );
+  const { pathname } = useLocation();
+  const clearMegaCloseTimer = useCallback(() => { if (megaCloseTimer.current !== null) window.clearTimeout(megaCloseTimer.current); }, []);
+  const closeMobileMenu = useCallback(() => setMenuOpen(false), []);
+  const closeMegaImmediately = useCallback(() => { clearMegaCloseTimer(); setMegaOpen(false); }, [clearMegaCloseTimer]);
+  const openMegaMenu = useCallback(() => { clearMegaCloseTimer(); setMegaOpen(true); }, [clearMegaCloseTimer]);
+  const closeMegaMenu = useCallback(() => { clearMegaCloseTimer(); megaCloseTimer.current = window.setTimeout(() => setMegaOpen(false), 180); }, [clearMegaCloseTimer]);
+  useEffect(() => closeMobileMenu(), [closeMobileMenu, pathname]);
+  useEffect(() => clearMegaCloseTimer, [clearMegaCloseTimer]);
+  return <>
+    <header className={cn("fixed inset-x-0 top-0 z-50 border-b text-white transition-[background-color,border-color,box-shadow,backdrop-filter] duration-500", scrolled ? "border-white/10 bg-[#0b6972]/95 shadow-[0_12px_40px_rgba(7,40,43,0.18)] backdrop-blur-md" : "border-transparent bg-gradient-to-b from-black/35 to-transparent")} data-testid="site-navbar">
+      <div className={cn("mx-auto flex max-w-[1440px] items-center justify-between px-5 transition-[height] duration-500 sm:px-8 lg:px-12", scrolled ? "h-16" : "h-20")}><NavbarBrand /><DesktopNavigation megaOpen={megaOpen} onMegaOpen={openMegaMenu} onMegaClose={closeMegaMenu} onMegaNavigate={closeMegaImmediately} onMegaToggle={() => setMegaOpen((open) => !open)} onMenuOpen={() => setMenuOpen(true)} /><MobileHeaderActions onMenuOpen={() => setMenuOpen(true)} /></div>
+    </header>
+    <MobileNavigationSheet open={menuOpen} onOpenChange={setMenuOpen} />
+  </>;
+}
+
+function NavbarBrand() {
+  return <Link to="/" className="group flex items-center gap-3" data-testid="nav-logo-link" aria-label="Tentwood Trips home"><span className="grid h-9 w-9 place-items-center rounded-full border border-white/50 font-serif text-lg italic transition-transform duration-300 group-hover:rotate-6">T</span><span className="font-serif text-xl tracking-tight">Tentwood <span className="text-[#9de9e6]">Trips</span></span></Link>;
+}
+
+function DesktopNavigation({ megaOpen, onMegaOpen, onMegaClose, onMegaNavigate, onMegaToggle, onMenuOpen }: { megaOpen: boolean; onMegaOpen: () => void; onMegaClose: () => void; onMegaNavigate: () => void; onMegaToggle: () => void; onMenuOpen: () => void }) {
+  return <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary navigation"><div className="relative" onMouseEnter={onMegaOpen} onMouseLeave={onMegaClose}><button type="button" className="flex cursor-pointer items-center gap-1.5 text-sm text-white/90 transition-colors hover:text-[#a8f1ef]" onFocus={onMegaOpen} onClick={onMegaToggle} data-testid="nav-explore-destinations-button" aria-expanded={megaOpen}>Explore Destinations <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", megaOpen && "rotate-180")} /></button>{megaOpen && <DestinationMegaMenu onNavigate={onMegaNavigate} />}</div><Link to="/about" className="text-sm text-white/90 transition-colors hover:text-[#a8f1ef]" data-testid="nav-about-link">About Us</Link><Link to="/contact" className="text-sm text-white/90 transition-colors hover:text-[#a8f1ef]" data-testid="nav-contact-link">Contact Us</Link><Link to="/careers" className="text-sm text-white/90 transition-colors hover:text-[#a8f1ef]" data-testid="nav-careers-link">Careers</Link><a href={whatsappUrl()} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-white/35 px-4 py-2 text-sm transition-colors hover:border-[#a8f1ef] hover:bg-white/10" data-testid="nav-whatsapp-link"><MessageCircle className="h-4 w-4" /> WhatsApp</a><button type="button" aria-label="Open navigation menu" className="grid h-10 w-10 place-items-center rounded-full border border-white/35 transition-colors hover:bg-white/10" onClick={onMenuOpen} data-testid="nav-menu-button"><Menu className="h-5 w-5" /></button></nav>;
+}
+
+function MobileHeaderActions({ onMenuOpen }: { onMenuOpen: () => void }) {
+  return <div className="flex items-center gap-2 lg:hidden"><a href={whatsappUrl()} target="_blank" rel="noreferrer" className="grid h-10 w-10 place-items-center rounded-full border border-white/35" aria-label="Chat on WhatsApp" data-testid="mobile-nav-whatsapp-link"><MessageCircle className="h-4 w-4" /></a><button type="button" aria-label="Open navigation menu" className="grid h-10 w-10 place-items-center rounded-full border border-white/35" onClick={onMenuOpen} data-testid="mobile-nav-menu-button"><Menu className="h-5 w-5" /></button></div>;
+}
+
+function MobileNavigationSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  return <Sheet open={open} onOpenChange={onOpenChange}><SheetContent side="right" className="w-screen border-l-0 bg-[#fdfbf7] px-6 pb-8 pt-10 sm:max-w-[460px]"><SheetHeader className="border-b border-[#1a1d20]/10 pb-7 text-left"><p className="font-mono text-[9px] uppercase tracking-[0.24em] text-[#0d7a84]">Tentwood journeys</p><SheetTitle className="font-serif text-3xl font-normal leading-tight text-[#1a1d20]">Where will you go next?</SheetTitle><SheetDescription className="max-w-xs text-sm leading-relaxed text-[#5a6065]">A considered journey is one conversation away.</SheetDescription></SheetHeader><div className="flex flex-col gap-2 py-6"><Link to="/destinations" className="flex items-center justify-between border-b border-[#1a1d20]/10 py-4 font-serif text-2xl text-[#1a1d20]" data-testid="mobile-menu-destinations-link">Explore destinations <ArrowUpRight className="h-5 w-5 text-[#0d7a84]" /></Link><Link to="/about" className="border-b border-[#1a1d20]/10 py-4 text-lg text-[#1a1d20]" data-testid="mobile-menu-about-link">About Tentwood</Link><Link to="/contact" className="border-b border-[#1a1d20]/10 py-4 text-lg text-[#1a1d20]" data-testid="mobile-menu-contact-link">Contact Us</Link><Link to="/careers" className="border-b border-[#1a1d20]/10 py-4 text-lg text-[#1a1d20]" data-testid="mobile-menu-careers-link">Careers</Link></div><div className="mb-7 grid grid-cols-2 gap-x-5 gap-y-3 border-b border-[#1a1d20]/10 pb-7" data-testid="mobile-menu-featured-destinations">{allDestinations.slice(0, 6).map((destination) => <Link key={destination.slug} to={`/destinations/${destination.slug}`} className="flex items-center justify-between py-1.5 text-sm text-[#5a6065]" data-testid={`mobile-menu-${destination.slug}-link`}>{destination.name}<ChevronRight className="h-3.5 w-3.5 text-[#0d7a84]" /></Link>)}</div><div className="mt-auto border-l-2 border-[#9de9e6] bg-[#0d7a84] p-5 text-white"><p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#9de9e6]">Speak with a travel expert</p><p className="mt-2 font-serif text-2xl">Let’s make a plan that feels like you.</p><a href={whatsappUrl()} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "secondary" }), "mt-5 w-full justify-center gap-2 bg-white text-[#0d7a84] hover:bg-[#e5f7f5]")} data-testid="mobile-menu-whatsapp-button"><MessageCircle className="h-4 w-4" /> Chat on WhatsApp</a></div><div className="mt-8 text-sm text-[#5a6065]"><a href={`tel:${TENTWOOD_CONTACT.phone.replace(/\s/g, "")}`} data-testid="mobile-menu-phone-link">{TENTWOOD_CONTACT.phone}</a><span className="mx-2">·</span><a href={`mailto:${TENTWOOD_CONTACT.email}`} data-testid="mobile-menu-email-link">{TENTWOOD_CONTACT.email}</a></div></SheetContent></Sheet>;
 }
 
 function DestinationMegaMenu({ onNavigate }: { onNavigate: () => void }) {
@@ -166,7 +188,7 @@ export function EnquiryForm({ destination, itinerary }: { destination: Destinati
 function Field({ label, required, className, children }: { label: string; required?: boolean; className?: string; children: ReactNode }) { return <label className={cn("flex flex-col gap-2", className)}><span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#5a6065]">{label}{required && " *"}</span>{children}</label>; }
 
 export function Footer() {
-  return <footer className="bg-[#182d30] px-5 pb-8 pt-16 text-white sm:px-8 lg:px-12" data-testid="site-footer"><div className="mx-auto max-w-[1440px]"><div className="grid gap-12 border-b border-white/15 pb-14 lg:grid-cols-[1.3fr_1fr_1fr_1fr]"><div><p className="font-serif text-3xl">Tentwood <span className="text-[#9de9e6]">Trips</span></p><p className="mt-5 max-w-xs text-sm leading-relaxed text-white/65">Beautifully considered journeys for people who want to see the world with a little more feeling.</p><div className="mt-6 flex gap-2"><span className="rounded-full border border-white/20 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-white/65">IATA partner</span><span className="rounded-full border border-white/20 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-white/65">ATTA member</span></div></div><FooterColumn title="Explore" links={[["International destinations", "/destinations"], ["Domestic destinations", "/destinations"], ["Visa-free escapes", "/destinations"], ["Traveller stories", "/#stories"]]} /><FooterColumn title="Tentwood" links={[["Our story", "/about"], ["Contact us", "/contact"], ["Careers", "/careers"], ["FAQ", "/contact"]]} /><div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#9de9e6]">Say hello</p><a href={`mailto:${TENTWOOD_CONTACT.email}`} className="mt-4 block font-serif text-xl" data-testid="footer-email-link">{TENTWOOD_CONTACT.email}</a><a href={whatsappUrl()} target="_blank" rel="noreferrer" className="mt-2 block text-sm text-white/65 transition-colors hover:text-white" data-testid="footer-whatsapp-link">WhatsApp our team ↗</a><div className="mt-7 flex gap-4 text-sm text-white/65"><a href="https://www.instagram.com/" target="_blank" rel="noreferrer" data-testid="footer-instagram-link">Instagram</a><a href="https://www.facebook.com/" target="_blank" rel="noreferrer" data-testid="footer-facebook-link">Facebook</a><a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" data-testid="footer-linkedin-link">LinkedIn</a></div></div></div><div className="flex flex-col gap-3 pt-7 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between"><span>© 2025 Tentwood Trips. All journeys reserved.</span><div className="flex gap-4"><a href="#" data-testid="footer-privacy-link">Privacy</a><a href="#" data-testid="footer-terms-link">Terms</a><a href="#" data-testid="footer-cancellation-link">Cancellation</a></div></div></div></footer>;
+  return <footer className="bg-[#182d30] px-5 pb-8 pt-16 text-white sm:px-8 lg:px-12" data-testid="site-footer"><div className="mx-auto max-w-[1440px]"><div className="grid gap-12 border-b border-white/15 pb-14 lg:grid-cols-[1.3fr_1fr_1fr_1fr]"><div><p className="font-serif text-3xl">Tentwood <span className="text-[#9de9e6]">Trips</span></p><p className="mt-5 max-w-xs text-sm leading-relaxed text-white/65">Beautifully considered journeys for people who want to see the world with a little more feeling.</p><div className="mt-6 flex gap-2"><span className="rounded-full border border-white/20 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-white/65">IATA partner</span><span className="rounded-full border border-white/20 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-white/65">ATTA member</span></div></div><FooterColumn title="Explore" links={FOOTER_EXPLORE_LINKS} /><FooterColumn title="Tentwood" links={FOOTER_TENTWOOD_LINKS} /><div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#9de9e6]">Say hello</p><a href={`mailto:${TENTWOOD_CONTACT.email}`} className="mt-4 block font-serif text-xl" data-testid="footer-email-link">{TENTWOOD_CONTACT.email}</a><a href={whatsappUrl()} target="_blank" rel="noreferrer" className="mt-2 block text-sm text-white/65 transition-colors hover:text-white" data-testid="footer-whatsapp-link">WhatsApp our team ↗</a><div className="mt-7 flex gap-4 text-sm text-white/65"><a href="https://www.instagram.com/" target="_blank" rel="noreferrer" data-testid="footer-instagram-link">Instagram</a><a href="https://www.facebook.com/" target="_blank" rel="noreferrer" data-testid="footer-facebook-link">Facebook</a><a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" data-testid="footer-linkedin-link">LinkedIn</a></div></div></div><div className="flex flex-col gap-3 pt-7 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between"><span>© 2025 Tentwood Trips. All journeys reserved.</span><div className="flex gap-4"><a href="#" data-testid="footer-privacy-link">Privacy</a><a href="#" data-testid="footer-terms-link">Terms</a><a href="#" data-testid="footer-cancellation-link">Cancellation</a></div></div></div></footer>;
 }
 
 function FooterColumn({ title, links }: { title: string; links: [string, string][] }) { return <div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#9de9e6]">{title}</p><div className="mt-4 flex flex-col gap-3">{links.map(([label, href]) => <Link key={label} to={href} className="w-fit text-sm text-white/65 transition-colors hover:text-white" data-testid={`footer-${label.toLowerCase().replaceAll(" ", "-")}-link`}>{label}</Link>)}</div></div>; }
@@ -175,31 +197,7 @@ export function SiteLayout({ children }: { children: ReactNode }) { return <div 
 
 export function ScrollToTop() {
   const { pathname, hash } = useLocation();
-  useLayoutEffect(() => {
-    window.history.scrollRestoration = "manual";
-    if (hash) return;
-    const reset = () => {
-      document.documentElement.style.scrollBehavior = "auto";
-      document.body.style.scrollBehavior = "auto";
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    };
-    reset();
-    const frame = window.requestAnimationFrame(reset);
-    const timer = window.setTimeout(reset, 180);
-    const handleInternalLink = (event: MouseEvent) => {
-      const link = (event.target as Element).closest("a");
-      const href = link?.getAttribute("href");
-      if (!href || href.startsWith("#") || href.includes("#") || href.startsWith("http") || link?.target === "_blank") return;
-      reset();
-      window.requestAnimationFrame(reset);
-      window.setTimeout(reset, 0);
-      window.setTimeout(reset, 100);
-    };
-    document.addEventListener("click", handleInternalLink, true);
-    return () => { window.cancelAnimationFrame(frame); window.clearTimeout(timer); document.removeEventListener("click", handleInternalLink, true); };
-  }, [hash, pathname]);
+  useLayoutEffect(() => installRouteScrollReset(hash), [hash, pathname]);
   return null;
 }
 
