@@ -127,17 +127,21 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Plus Jakarta Sans Variable', sans-serif;
-    overflow-x: hidden;
+    overflow-x: clip;
     }
   html {
     @apply font-sans;
     scroll-behavior: smooth;
     overflow-anchor: none;
+    max-width: 100%;
+    overflow-x: clip;
     }
-  body { overflow-anchor: none; }
+  body, #root { max-width: 100%; overflow-anchor: none; }
+  img { display: block; max-width: 100%; }
   h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display Variable', serif; font-optical-sizing: auto; text-wrap: balance; }
   p { text-wrap: pretty; }
   button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 2px solid #53c9c7; outline-offset: 3px; }
 }
 
 @keyframes cinematic-reveal {
@@ -158,6 +162,12 @@
 .animate-cinematic-reveal { animation: cinematic-reveal 1.2s cubic-bezier(.2,.7,.2,1) both; }
 .animate-menu-reveal { animation: menu-reveal 180ms ease-out both; }
 .animate-itinerary-reveal { animation: itinerary-reveal 220ms ease-out both; }
+
+@media (max-width: 767px) {
+  input, select, textarea { font-size: 16px !important; }
+  button, select, input[type="button"], input[type="submit"] { min-height: 44px; }
+  [data-testid="site-footer"] { padding-bottom: max(2rem, env(safe-area-inset-bottom)); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }

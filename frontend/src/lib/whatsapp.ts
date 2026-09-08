@@ -1,6 +1,6 @@
 export const TENTWOOD_CONTACT = {
-  whatsapp: "18008368966",
-  phone: "+91 80 4680 2188",
+  whatsapp: "917358822746",
+  phone: "+91 73588 22746",
   email: "hello@tentwoodtrips.com",
 };
 
