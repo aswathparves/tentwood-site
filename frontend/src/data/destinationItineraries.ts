@@ -5,13 +5,69 @@ type DayInput = [title: string, details: string, tags: string[]];
 const inclusions = ["Handpicked accommodation", "Private airport transfers", "Curated experiences shown in the plan", "Daily breakfast", "Local Tentwood assistance"];
 const exclusions = ["International flights", "Personal expenses", "Meals not mentioned", "Optional activities", "Travel insurance unless specified"];
 
+const destinationNames: Record<string, string> = {
+  dubai: "Dubai", japan: "Japan", switzerland: "Switzerland", kashmir: "Kashmir", kerala: "Kerala", rajasthan: "Rajasthan", goa: "Goa", thailand: "Thailand", malaysia: "Malaysia", maldives: "Maldives", italy: "Italy", singapore: "Singapore", "phu-quoc": "Phu Quoc", turkey: "Turkey", australia: "Australia",
+};
+
+function scaledPrice(price: string, factor: number) {
+  const value = Number(price.replace(/[^0-9]/g, ""));
+  const scaled = Math.round((value * factor) / 500) * 500;
+  return `₹${scaled.toLocaleString("en-IN")}`;
+}
+
+function durationFor(days: number) {
+  return `${days - 1} Nights / ${days} Days`;
+}
+
+function normalizeDays(days: DayInput[]) {
+  return days.map(([title, details, tags], index) => ({ day: String(index + 1).padStart(2, "0"), title, details, tags }));
+}
+
 function journey(slug: string, name: string, duration: string, route: string, price: string, summary: string, image: string, days: DayInput[]): Itinerary[] {
-  return [{
+  const place = destinationNames[slug] ?? name;
+  const signature: Itinerary = {
     id: `${slug}-signature`, name, duration, route, price, summary, image,
-    days: days.map(([title, details, tags], index) => ({ day: String(index + 1).padStart(2, "0"), title, details, tags })),
+    days: normalizeDays(days),
     inclusions,
     exclusions,
-  }];
+  };
+  const shortDayCount = Math.max(4, Math.ceil(days.length * 0.64));
+  const departure = days[days.length - 1]!;
+  const shortDays: DayInput[] = [...days.slice(0, shortDayCount - 1), departure];
+  const shortRoute = route.split(" · ").slice(0, 2).join(" · ");
+  const short: Itinerary = {
+    id: `${slug}-short`,
+    name: `${place} Short Escape`,
+    duration: durationFor(shortDays.length),
+    route: shortRoute,
+    price: scaledPrice(price, 0.72),
+    summary: `A focused first taste of ${place}, keeping the defining moments while making the most of a shorter break.`,
+    image,
+    days: normalizeDays(shortDays),
+    inclusions,
+    exclusions,
+  };
+  const middle = Math.max(2, Math.floor(days.length / 2));
+  const slowDays: DayInput[] = [
+    ...days.slice(0, middle),
+    [`A day left open in ${place}`, `A deliberately unplanned day to return to somewhere you loved, follow a local recommendation or simply enjoy the stay at your own pace.`, ["Slow travel", "Your choice"]],
+    ...days.slice(middle, -1),
+    ["One more day, no rush", `A final full day with space for a favourite neighbourhood, a long lunch or one last experience chosen with your Tentwood expert.`, ["Free time", "Local recommendation"]],
+    departure,
+  ];
+  const slow: Itinerary = {
+    id: `${slug}-slow`,
+    name: `${place}, Slowly`,
+    duration: durationFor(slowDays.length),
+    route,
+    price: scaledPrice(price, 1.28),
+    summary: `The signature ${place} route with two open days added for longer lunches, spontaneous discoveries and the pleasure of not rushing.`,
+    image,
+    days: normalizeDays(slowDays),
+    inclusions,
+    exclusions,
+  };
+  return [short, signature, slow];
 }
 
 export const destinationItineraryLibrary: Record<string, Itinerary[]> = {

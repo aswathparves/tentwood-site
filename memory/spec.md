@@ -7,12 +7,12 @@ Premium editorial travel showcase for Tentwood Trips. It presents curated intern
 `/`, `/destinations`, `/destinations/bali`, `/destinations/dubai`, `/destinations/japan`, `/destinations/switzerland`, `/about`, `/contact`, `/careers`. A reusable `/destinations/:slug` route also supports domestic and expanded destinations: Thailand, Malaysia, Maldives, Italy, Singapore, Phu Quoc, Turkey and Australia.
 
 ## Data model
-Local TypeScript data files hold `Destination`, `Journey`, `Itinerary`, `JourneyDay`, `Experience`, `Review` and `Campaign` concepts. Every listed destination now has a detailed signature itinerary with day-by-day editorial copy, route, price, inclusions and exclusions. Bali retains three selectable journeys; all destination pages use the same editorial itinerary timeline.
+Local TypeScript data files hold `Destination`, `Journey`, `Itinerary`, `JourneyDay`, `Experience`, `Review` and `Campaign` concepts. Every non-Bali destination has three selectable, fully detailed variants: a shorter escape, the signature route and a slower journey with two extra open days. Prices scale by trip length, and every variant has its own route, duration, complete daily timeline, inclusions and exclusions. Bali retains its three bespoke selectable journeys; all destination pages use the same editorial itinerary timeline.
 
 ## Key flows
 - Search destinations from the homepage or destinations listing, then open a destination page.
 - Filter homepage journeys by destination, budget, traveller type and parsed trip duration (3–5, 6–9, or 10+ days).
-- On any destination, inspect its signature itinerary and expand day-by-day editorial timeline rows; Bali offers three selectable journeys.
+- On any destination, choose among three journey lengths, see the overview and price update, and expand the complete day-by-day editorial timeline.
 - Submit destination, contact or career forms to see a ready-to-send state; no form claims data was saved.
 - All primary conversion actions open WhatsApp with a pre-filled message.
 - Internal route changes reset the document scroll to the top, including clicks made after a deep homepage scroll; hash links remain anchor-based.
