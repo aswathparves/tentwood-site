@@ -4,10 +4,10 @@
 Premium editorial travel showcase for Tentwood Trips. It presents curated international and domestic journeys, reusable destination detail pages, itinerary exploration and WhatsApp-first enquiry flows. V1 intentionally has no authentication, payment, CRM, booking engine, AI features or persisted enquiry backend.
 
 ## Routes
-`/`, `/destinations`, `/destinations/bali`, `/destinations/dubai`, `/destinations/japan`, `/destinations/switzerland`, `/about`, `/contact`, `/careers`. A reusable `/destinations/:slug` route also supports the structured domestic destination cards.
+`/`, `/destinations`, `/destinations/bali`, `/destinations/dubai`, `/destinations/japan`, `/destinations/switzerland`, `/about`, `/contact`, `/careers`. A reusable `/destinations/:slug` route also supports domestic and expanded destinations: Thailand, Malaysia, Maldives, Italy, Singapore, Phu Quoc, Turkey and Australia.
 
 ## Data model
-Local TypeScript data files hold `Destination`, `Journey`, `Itinerary`, `JourneyDay`, `Experience`, `Review` and `Campaign` concepts. Bali has the richest itinerary content; other destination pages use the same reusable structure with tailored editorial content.
+Local TypeScript data files hold `Destination`, `Journey`, `Itinerary`, `JourneyDay`, `Experience`, `Review` and `Campaign` concepts. Bali has the richest itinerary content; other destination pages use the same reusable structure with tailored editorial content. The eight expanded destinations each have destination data, a homepage journey card and a matching journey record.
 
 ## Key flows
 - Search destinations from the homepage or destinations listing, then open a destination page.
@@ -15,6 +15,7 @@ Local TypeScript data files hold `Destination`, `Journey`, `Itinerary`, `Journey
 - On Bali, choose an itinerary and expand day-by-day timeline rows.
 - Submit destination, contact or career forms to see a ready-to-send state; no form claims data was saved.
 - All primary conversion actions open WhatsApp with a pre-filled message.
+- Internal route changes reset the document scroll to the top, including clicks made after a deep homepage scroll; hash links remain anchor-based.
 
 ## Auth
 None. No credentials required.

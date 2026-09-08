@@ -132,7 +132,9 @@
   html {
     @apply font-sans;
     scroll-behavior: smooth;
+    overflow-anchor: none;
     }
+  body { overflow-anchor: none; }
   h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display Variable', serif; }
   button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 }

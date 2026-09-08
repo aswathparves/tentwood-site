@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowUpRight, Check, ChevronDown, ChevronRight, Clock3, Filter, Menu, MessageCircle, Search } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -10,6 +10,8 @@ import { allDestinations } from "@/data/destinations";
 import { journeys } from "@/data/journeys";
 import { TENTWOOD_CONTACT, whatsappUrl } from "@/lib/whatsapp";
 import type { Destination, Journey } from "@/data/types";
+
+if (typeof window !== "undefined") window.history.scrollRestoration = "manual";
 
 export function Seo({ title, description }: { title: string; description: string }) {
   useEffect(() => {
@@ -115,8 +117,8 @@ export function SectionHeading({ eyebrow, title, copy, light = false, action }: 
   </div>;
 }
 
-export function DestinationCard({ destination, compact = false }: { destination: Destination; compact?: boolean }) {
-  return <Link to={`/destinations/${destination.slug}`} className={cn("group relative block overflow-hidden rounded-xl bg-[#f2ede4]", compact ? "min-w-[260px]" : "min-h-[330px]")} data-testid={`destination-card-${destination.slug}`}>
+export function DestinationCard({ destination, compact = false, testIdSuffix }: { destination: Destination; compact?: boolean; testIdSuffix?: string }) {
+  return <Link to={`/destinations/${destination.slug}`} className={cn("group relative block overflow-hidden rounded-xl bg-[#f2ede4]", compact ? "min-w-[260px]" : "min-h-[330px]")} data-testid={`destination-card-${destination.slug}${testIdSuffix ? `-${testIdSuffix}` : ""}`}>
     <img src={destination.image} alt={`${destination.name} — ${destination.descriptor}`} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-105" />
     <div className="absolute inset-0 bg-gradient-to-t from-[#101b1d]/80 via-[#101b1d]/10 to-transparent" />
     <div className="relative flex min-h-[330px] flex-col justify-end p-5 text-white"><div className="mb-auto flex items-start justify-between"><Badge className="border-0 bg-white/15 font-mono text-[9px] uppercase tracking-[0.14em] text-white backdrop-blur-sm">{destination.category}</Badge><ArrowUpRight className="h-5 w-5 opacity-80 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" /></div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/65">{destination.country}</p><h3 className="mt-1 font-serif text-3xl">{destination.name}</h3><p className="mt-1 max-w-[240px] text-sm text-white/75">{destination.descriptor}</p></div>
@@ -159,7 +161,39 @@ export function Footer() {
 
 function FooterColumn({ title, links }: { title: string; links: [string, string][] }) { return <div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#9de9e6]">{title}</p><div className="mt-4 flex flex-col gap-3">{links.map(([label, href]) => <Link key={label} to={href} className="w-fit text-sm text-white/65 transition-colors hover:text-white" data-testid={`footer-${label.toLowerCase().replaceAll(" ", "-")}-link`}>{label}</Link>)}</div></div>; }
 
-export function SiteLayout({ children }: { children: ReactNode }) { return <div className="min-h-svh bg-[#fdfbf7] text-[#1a1d20]"><Navbar /><main>{children}</main><Footer /><WhatsAppButton /></div>; }
+export function SiteLayout({ children }: { children: ReactNode }) { return <div className="min-h-svh bg-[#fdfbf7] text-[#1a1d20]"><ScrollToTop /><Navbar /><main>{children}</main><Footer /><WhatsAppButton /></div>; }
+
+export function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+  useLayoutEffect(() => {
+    window.history.scrollRestoration = "manual";
+    if (hash) return;
+    const reset = () => {
+      document.documentElement.style.scrollBehavior = "auto";
+      document.body.style.scrollBehavior = "auto";
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    reset();
+    const frame = window.requestAnimationFrame(reset);
+    const timer = window.setTimeout(reset, 180);
+    const interval = window.setInterval(reset, 80);
+    const stopInterval = window.setTimeout(() => window.clearInterval(interval), 1200);
+    const handleInternalLink = (event: MouseEvent) => {
+      const link = (event.target as Element).closest("a");
+      const href = link?.getAttribute("href");
+      if (!href || href.startsWith("#") || href.includes("#") || href.startsWith("http") || link?.target === "_blank") return;
+      reset();
+      window.requestAnimationFrame(reset);
+      window.setTimeout(reset, 0);
+      window.setTimeout(reset, 100);
+    };
+    document.addEventListener("click", handleInternalLink, true);
+    return () => { window.cancelAnimationFrame(frame); window.clearTimeout(timer); window.clearTimeout(stopInterval); window.clearInterval(interval); document.removeEventListener("click", handleInternalLink, true); };
+  }, [hash, pathname]);
+  return null;
+}
 
 export function PageIntro({ eyebrow, title, copy, image }: { eyebrow: string; title: string; copy: string; image?: string }) { return <section className="relative overflow-hidden bg-[#0d7a84] px-5 pb-16 pt-36 text-white sm:px-8 lg:px-12 lg:pb-24"><div className="absolute inset-0 opacity-20">{image && <img src={image} alt="" className="h-full w-full object-cover mix-blend-luminosity" />}</div><div className="relative mx-auto max-w-[1440px]"><div className="max-w-3xl"><div className="flex items-center gap-3"><span className="h-px w-8 bg-[#9de9e6]" /><span className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#9de9e6]">{eyebrow}</span></div><h1 className="mt-5 font-serif text-5xl leading-[1.04] sm:text-6xl lg:text-8xl">{title}</h1><p className="mt-6 max-w-xl text-base leading-relaxed text-white/72 sm:text-lg">{copy}</p></div></div></section>; }
 
