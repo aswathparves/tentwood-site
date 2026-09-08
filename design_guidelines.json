@@ -1,0 +1,88 @@
+{
+  "brand": {
+    "name": "Tentwood Trips",
+    "tagline": "Curated Editorial Luxury Journeys & Bespoke Private Escapes",
+    "archetype": "Editorial Luxury Travel & Refined Hospitality",
+    "theme": "Light mode editorial warm minimalism with Turquoise Blue Header"
+  },
+  "colors": {
+    "header_bg": "#0D7A84",
+    "header_text": "#FFFFFF",
+    "header_accent": "#2AD0DC",
+    "primary": "#0D7A84",
+    "primary_hover": "#0A5E66",
+    "bg_base": "#FDFBF7",
+    "bg_card": "#F8F5EE",
+    "bg_subtle": "#F2EDE4",
+    "text_dark": "#1A1D20",
+    "text_muted": "#5A6065",
+    "accent_warm": "#D98A6C",
+    "accent_gold": "#C69C6D",
+    "border_subtle": "rgba(26, 29, 32, 0.08)",
+    "border_focus": "#0D7A84"
+  },
+  "typography": {
+    "heading_font": "Playfair Display, Lora, serif",
+    "body_font": "Plus Jakarta Sans, Manrope, sans-serif",
+    "mono_font": "JetBrains Mono, monospace",
+    "hero_h1": "text-4xl sm:text-5xl lg:text-6xl font-serif font-medium tracking-tight text-slate-900 leading-[1.15]",
+    "section_h2": "text-2xl sm:text-3xl lg:text-4xl font-serif font-medium tracking-tight text-slate-900",
+    "card_h3": "text-xl sm:text-2xl font-serif font-medium text-slate-900",
+    "body_text": "text-base text-slate-600 leading-relaxed font-sans",
+    "label": "text-xs font-mono uppercase tracking-[0.2em] text-teal-700"
+  },
+  "routes": [
+    "/",
+    "/destinations",
+    "/destinations/bali",
+    "/destinations/dubai",
+    "/destinations/japan",
+    "/destinations/switzerland",
+    "/about",
+    "/contact",
+    "/careers"
+  ],
+  "components": {
+    "header": {
+      "type": "Sticky Turquoise Header with Mega Menu",
+      "desktop_menu": "Destinations Mega Menu with rich photo previews, Regions (International, Domestic, Visa-Free), Style Escapes, Contact Link",
+      "mobile_drawer": "Slide-over sheet navigation with search, destination links, contact info and direct WhatsApp action button"
+    },
+    "hero": {
+      "type": "Cinematic Editorial Hero",
+      "elements": "High-res destination photography background, search filter overlay with interactive autocomplete, badge highlight, quick journey tags"
+    },
+    "destination_cards": {
+      "type": "Bento & Asymmetrical Grid",
+      "style": "Zero over-rounded borders (rounded-lg or rounded-xl max), subtle hover image zoom, rich badges (Visa-Free, Best Season, Curated), price range, duration"
+    },
+    "itinerary_timeline": {
+      "type": "Interactive Expandable Timeline",
+      "style": "Day-by-day collapsible sections with detailed meals, stay names, activity tags, and luxury inclusions"
+    },
+    "whatsapp_integration": {
+      "mode": "Direct prefilled message handoff",
+      "phone": "+18008368966",
+      "default_text": "Hi Tentwood Trips! I would like to plan a bespoke luxury journey."
+    }
+  },
+  "image_urls": {
+    "bali_hero": "https://images.unsplash.com/photo-1675657144361-98ae33e6b6f9?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "bali_villa": "https://images.unsplash.com/photo-1651108066220-f61c22fc281f?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "switzerland_alps": "https://images.unsplash.com/photo-1567250948107-98bf56ae6207?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "switzerland_lake": "https://images.unsplash.com/photo-1517079810336-d39e72287591?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "japan_kyoto": "https://images.unsplash.com/photo-1665706896821-319040b81753?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "japan_shrine": "https://images.unsplash.com/photo-1582603455714-a46aaf41e5d9?crop=entropy&cs=srgb&fm=jpg&q=85"
+  },
+  "accessibility_and_testing": {
+    "data_testid_convention": "kebab-case, e.g., data-testid='nav-destination-bali', data-testid='hero-search-input', data-testid='whatsapp-cta-button'",
+    "wcag_contrast": "Ensure 4.5:1 for standard text over warm linen and 3:1 for large display headers"
+  },
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "No generic SaaS or AI templates. Use sophisticated editorial travel design inspired by Aman, Belmond, and Roar Africa.",
+    "Turquoise Header MUST be dark turquoise (#0D7A84) with crisp white text and bright turquoise hover accents.",
+    "Every interactive button, link, search input, card, modal toggle, and form element MUST have a clear data-testid attribute.",
+    "All forms MUST show a ready-to-send success state with prefilled WhatsApp action.",
+    "All 9 routes must be fully functional and rendered with rich, real, editorial content (no dummy lorem ipsum)."
+  ]
+}

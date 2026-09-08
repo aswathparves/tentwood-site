@@ -1,0 +1,9 @@
+import type { Journey } from "./types";
+
+export const journeys: Journey[] = [
+  { id: "j-bali", destination: "Bali", slug: "bali", title: "Bali Escape", duration: "5 Nights / 6 Days", travelType: "Couple", budget: "₹50K–₹1.5L", price: "₹58,500", descriptor: "A slower first taste of the island", image: "https://images.unsplash.com/photo-1675657144361-98ae33e6b6f9?auto=format&fit=crop&w=1200&q=85" },
+  { id: "j-japan", destination: "Japan", slug: "japan", title: "Japan, in detail", duration: "9 Nights / 10 Days", travelType: "Couple", budget: "₹1.5L–₹2.5L", price: "₹1,46,000", descriptor: "A study in rituals, flavours and light", image: "https://images.unsplash.com/photo-1665706896821-319040b81753?auto=format&fit=crop&w=1200&q=85" },
+  { id: "j-switzerland", destination: "Switzerland", slug: "switzerland", title: "Alpine Summer", duration: "7 Nights / 8 Days", travelType: "Family", budget: "₹1.5L–₹2.5L", price: "₹1,28,000", descriptor: "The scenic route, beautifully paced", image: "https://images.unsplash.com/photo-1567250948107-98bf56ae6207?auto=format&fit=crop&w=1200&q=85" },
+  { id: "j-dubai", destination: "Dubai", slug: "dubai", title: "Dubai in Layers", duration: "5 Nights / 6 Days", travelType: "Family", budget: "₹50K–₹1.5L", price: "₹62,000", descriptor: "Skyline energy, desert stillness", image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=85" },
+  { id: "j-rajasthan", destination: "Rajasthan", slug: "rajasthan", title: "The Royal Route", duration: "7 Nights / 8 Days", travelType: "Friends", budget: "Under ₹50K", price: "₹48,000", descriptor: "Craft, colour and old-world hospitality", image: "https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=1200&q=85" },
+];

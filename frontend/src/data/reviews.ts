@@ -1,0 +1,5 @@
+export const travellerReviews = [
+  { name: "Nandita & Arjun", quote: "It felt like a friend with impeccable taste had planned the trip for us.", rating: "5.0", platform: "Google", image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=82", url: "https://www.google.com/search?q=Tentwood+Trips+reviews" },
+  { name: "Aarav Menon", quote: "The best part was the space between the plans. We came home feeling rested.", rating: "5.0", platform: "Instagram", image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=82", url: "https://www.instagram.com/" },
+  { name: "The Kapur family", quote: "From the first call to our return home, every detail was handled with warmth.", rating: "5.0", platform: "Facebook", image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=900&q=82", url: "https://www.facebook.com/" },
+];

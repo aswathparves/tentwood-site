@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://expedition-draft.preview.emergentagent.com/sitemap.xml
